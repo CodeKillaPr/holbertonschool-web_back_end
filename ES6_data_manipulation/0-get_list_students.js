@@ -1,8 +1,9 @@
 export class GetListStudents {
-  constructor() {
-    this.students = ['John', 'Jane', 'Doe'];
+  constructor(students) {
+    this.students = students;
   }
-  getListStudents() {
+
+  execute() {
     return this.students;
   }
 }
