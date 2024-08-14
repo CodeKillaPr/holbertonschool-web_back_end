@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
-"""This module contains a function
-that returns the floor of the division of n by m"""
+"""
+Module with a type-annotated function floor
+"""
+
+import math
 
 
-def floor(n, m):
-    """Returns the floor of the division of n by m """
-    return n // m
+def floor(n: float) -> int:
+    """
+    Function that takes a float n as argument.
+    """
+    return math.floor(n)
