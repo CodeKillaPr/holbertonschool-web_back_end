@@ -1,12 +1,8 @@
 #!/usr/bin/env python3
-"""
-Description: The goal here is that if between two queries, certain rows are
-             removed from the dataset, the user does not miss items from
-             dataset when changing page
-"""
-
+''' Hypermedia pagination '''
 import csv
-from typing import List, Dict
+import math
+from typing import Dict, List, Tuple
 
 
 class Server:
@@ -15,9 +11,7 @@ class Server:
     DATA_FILE = "Popular_Baby_Names.csv"
 
     def __init__(self):
-        ''' Initialize instance. '''
         self.__dataset = None
-        self.__indexed_dataset = None
 
     def dataset(self) -> List[List]:
         """Cached dataset
@@ -30,40 +24,37 @@ class Server:
 
         return self.__dataset
 
-    def indexed_dataset(self) -> Dict[int, List]:
-        """Dataset indexed by sorting position, starting at 0
-        """
-        if self.__indexed_dataset is None:
-            dataset = self.dataset()
-            self.__indexed_dataset = {
-                i: dataset[i] for i in range(len(dataset))
-            }
-        return self.__indexed_dataset
+    def get_page(self, page: int = 1, page_size: int = 10) -> List[List]:
+        ''' def get page '''
+        assert type(page_size) is int and type(page) is int
+        assert page > 0
+        assert page_size > 0
+        self.dataset()
+        i = index_range(page, page_size)
+        if i[0] >= len(self.__dataset):
+            return []
+        else:
+            return self.__dataset[i[0]:i[1]]
 
-    def get_hyper_index(self, index: int = None, page_size: int = 10) -> Dict:
-        ''' Return dict of pagination data.
-            Dict key/value pairs consist of the following:
-              index - the start index of the page
-              next_index - the start index of the next page
-              page_size - the number of items on the page
-              data - the data in the page itself '''
-        assert 0 <= index < len(self.dataset())
+    def get_hyper(self, page: int = 1, page_size: int = 10) -> Dict:
+        ''' Def get hyper '''
+        dataset_items = len(self.dataset())
+        data = self.get_page(page, page_size)
+        total_pages = math.ceil(dataset_items / page_size)
 
-        indexed_dataset = self.indexed_dataset()
-        indexed_page = {}
-
-        i = index
-        while (len(indexed_page) < page_size and i < len(self.dataset())):
-            if i in indexed_dataset:
-                indexed_page[i] = indexed_dataset[i]
-            i += 1
-
-        page = list(indexed_page.values())
-        page_indices = indexed_page.keys()
-
-        return {
-            'index': index,
-            'next_index': max(page_indices) + 1,
-            'page_size': len(page),
-            'data': page
+        p = {
+            "page": page,
+            "page_size": page_size if page < total_pages else 0,
+            "data": data,
+            "next_page": page + 1 if page + 1 < total_pages else None,
+            "prev_page": page - 1 if page - 1 > 0 else None,
+            "total_pages": total_pages
         }
+        return p
+
+
+def index_range(page: int, page_size: int) -> Tuple[int, int]:
+    ''' Def index range '''
+    index = page * page_size - page_size
+    index_1 = index + page_size
+    return (index, index_1)
