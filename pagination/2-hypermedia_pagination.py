@@ -6,7 +6,6 @@ Description: The goal here is that if between two queries, certain rows are
 """
 
 import csv
-import math
 from typing import List, Dict
 
 
@@ -36,7 +35,6 @@ class Server:
         """
         if self.__indexed_dataset is None:
             dataset = self.dataset()
-            truncated_dataset = dataset[:1000]
             self.__indexed_dataset = {
                 i: dataset[i] for i in range(len(dataset))
             }
@@ -47,7 +45,6 @@ class Server:
             Dict key/value pairs consist of the following:
               index - the start index of the page
               next_index - the start index of the next page
-              page_size
               page_size - the number of items on the page
               data - the data in the page itself '''
         assert 0 <= index < len(self.dataset())
